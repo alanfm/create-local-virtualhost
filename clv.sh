@@ -1,4 +1,5 @@
 #!/bin/bash
+# Author: Yevgeniy Goncharov aka xck, http://sys-admin.kz
 
 VHOST=${VHOST}
 FLAG=${FLAG}
