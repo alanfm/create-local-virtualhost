@@ -14,8 +14,12 @@ Usage: $0 options
 OPTIONS:
    -c      Create VirtualHost
    -r      Remove VirtualHost
+   -l      List VirtualHost
 
-Example: $0 -c vhost
+Example:
+$0 -c vhost
+$0 -r vhost
+$0 -l show
    
 EOF
 }
@@ -38,6 +42,11 @@ do
 	FLAG="2"
 	shift
 	;;
+	-l|--list)
+	
+	FLAG="3"
+	shift
+	;;
 esac
 done
 
@@ -55,7 +64,6 @@ DOMAIN_NAME=$VHOST.$domain
 
 public_html="public_html"
 webroot="/var/www"
-
 
 CHOWNERS="root:webdevs"
 DIRECTORY=$webroot/$DOMAIN_NAME/$public_html
@@ -77,9 +85,10 @@ if [[ "$FLAG" == "1" ]]
 	  	echo -e "Exit!"
   	else
   		# not exist
+  		echo -e "Create: $DIRECTORY"
 	  	/usr/bin/mkdir -p $DIRECTORY
-	  	echo -e "Folders created: $DIRECTORY"
 
+	  	echo "Create $INDEX_HTML"
 	  	/usr/bin/touch $INDEX_HTML
 
 	  	echo "<html>" > $INDEX_HTML
@@ -92,12 +101,15 @@ if [[ "$FLAG" == "1" ]]
 		echo "</html>" >> $INDEX_HTML
 		echo -e "File $INDEX_HTML created"
 
+		echo "Change vhost folder permission..."
 		/usr/bin/chown -R $CHOWNERS $webroot/$DOMAIN_NAME
 		/usr/bin/chmod -R 775 $webroot/$DOMAIN_NAME
 
+		echo "Create httpd service folders..."
 		/usr/bin/mkdir -p /etc/httpd/sites-created
 		/usr/bin/mkdir -p /etc/httpd/sites-enabled
 
+		echo "Create conf file $CONF_FILE"
 		/usr/bin/touch $CONF_FILE
 
 		echo "<VirtualHost *:80>" > $CONF_FILE
@@ -108,13 +120,16 @@ if [[ "$FLAG" == "1" ]]
 		echo "CustomLog /var/www/$DOMAIN_NAME/requests.log combined" >> $CONF_FILE
 		echo "</VirtualHost>" >> $CONF_FILE
 
+		echo "Create link / Enable domain $DOMAIN_NAME"
 		/usr/bin/ln -s $CONF_FILE /etc/httpd/sites-enabled/$CONF_FILE_NAME
 
+		echo -e "Update /etc/hosts file\nAdd $LOCAL_IP $DOMAIN_NAME"
 		echo "$LOCAL_IP $DOMAIN_NAME" >> /etc/hosts
 
+		echo "Restart HTTPD..."
 		service httpd restart
 
-		echo -e "Please add include conf folder into httpd.conf\nIncludeOptional sites-enabled/*.conf\nDirectory $DOMAIN_NAME created\n"
+		echo -e "\nDone!\n\nPlease add include conf folder into httpd.conf parameter:\nIncludeOptional sites-enabled/*.conf\n"
 	fi
 
 	# --------------
@@ -127,7 +142,8 @@ if [[ "$FLAG" == "2" ]]
 	
 	if [ -d "$DIRECTORY" ]; then
   	# if exist
-  	echo "Removing $VHOST"
+  	echo -e "\nRemoving $VHOST"
+
   	echo "Remove directory $webroot/$DOMAIN_NAME"
   	/usr/bin/rm -rf $webroot/$DOMAIN_NAME
 
@@ -140,12 +156,25 @@ if [[ "$FLAG" == "2" ]]
   	echo "Comment /etc/hosts param..."
   	/bin/sed -i "s/$LOCAL_IP $DOMAIN_NAME/#$LOCAL_IP $DOMAIN_NAME/" /etc/hosts
   	
-  	echo "Done!"
+  	echo -e "Done!\n"
 
   else
-  	echo -e "Directory not exist!\nExit!"
+  	echo -e "\nDirectory not exist!\nPlease use remove command without extention\nExit!\n"
   	exit 1
   fi
 
 fi
 
+# See VHosts
+# ---------------------------------------------------\
+if [[ "$FLAG" == "3" ]]
+	then
+	echo -e "\nSites created"
+	/usr/bin/ls -la /etc/httpd/sites-created
+
+	echo -e "\nSites enabled"
+	/usr/bin/ls -la /etc/httpd/sites-enabled
+
+	echo -e "\n/var/www folder list"
+	/usr/bin/ls -la /var/www
+fi
