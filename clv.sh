@@ -1,6 +1,12 @@
 #!/bin/bash
 # Author: Yevgeniy Goncharov aka xck, http://sys-admin.kz
 
+
+# iptable rules
+# iptables -I INPUT -p tcp -m tcp --dport 81 -j ACCEPT
+# service iptables save
+# service iptables restart
+
 VHOST=${VHOST}
 FLAG=${FLAG}
 
@@ -31,7 +37,6 @@ while [[ $# > 1 ]]
 do
 	key="$1"
 	shift
-
 	case $key in
 	-c|--create)
 	VHOST="$1"
@@ -44,7 +49,6 @@ do
 	shift
 	;;
 	-l|--list)
-	
 	FLAG="3"
 	shift
 	;;
@@ -66,7 +70,7 @@ DOMAIN_NAME=$VHOST.$domain
 public_html="public_html"
 webroot="/var/www"
 
-CHOWNERS="root:webdevs"
+CHOWNERS="root:apache"
 DIRECTORY=$webroot/$DOMAIN_NAME/$public_html
 INDEX_HTML="$DIRECTORY/index.html"
 PATH_TO_CONF="/etc/httpd/sites-created"
@@ -87,10 +91,10 @@ if [[ "$FLAG" == "1" ]]
   	else
   		# not exist
   		echo -e "Create: $DIRECTORY"
-	  	/usr/bin/mkdir -p $DIRECTORY
+	  	/bin/mkdir -p $DIRECTORY
 
 	  	echo "Create $INDEX_HTML"
-	  	/usr/bin/touch $INDEX_HTML
+	  	/bin/touch $INDEX_HTML
 
 	  	echo "<html>" > $INDEX_HTML
 		echo " <head>" >> $INDEX_HTML
@@ -103,15 +107,15 @@ if [[ "$FLAG" == "1" ]]
 		echo -e "File $INDEX_HTML created"
 
 		echo "Change vhost folder permission..."
-		/usr/bin/chown -R $CHOWNERS $webroot/$DOMAIN_NAME
-		/usr/bin/chmod -R 775 $webroot/$DOMAIN_NAME
+		/bin/chown -R $CHOWNERS $webroot/$DOMAIN_NAME
+		/bin/chmod -R 775 $webroot/$DOMAIN_NAME
 
 		echo "Create httpd service folders..."
-		/usr/bin/mkdir -p /etc/httpd/sites-created
-		/usr/bin/mkdir -p /etc/httpd/sites-enabled
+		/bin/mkdir -p /etc/httpd/sites-created
+		/bin/mkdir -p /etc/httpd/sites-enabled
 
 		echo "Create conf file $CONF_FILE"
-		/usr/bin/touch $CONF_FILE
+		/bin/touch $CONF_FILE
 
 		echo "<VirtualHost *:80>" > $CONF_FILE
 		echo "ServerName www.$DOMAIN_NAME" >> $CONF_FILE
@@ -122,7 +126,7 @@ if [[ "$FLAG" == "1" ]]
 		echo "</VirtualHost>" >> $CONF_FILE
 
 		echo "Create link / Enable domain $DOMAIN_NAME"
-		/usr/bin/ln -s $CONF_FILE /etc/httpd/sites-enabled/$CONF_FILE_NAME
+		/bin/ln -s $CONF_FILE /etc/httpd/sites-enabled/$CONF_FILE_NAME
 
 		echo -e "Update /etc/hosts file\nAdd $LOCAL_IP $DOMAIN_NAME"
 		echo "$LOCAL_IP $DOMAIN_NAME" >> /etc/hosts
@@ -146,13 +150,13 @@ if [[ "$FLAG" == "2" ]]
   	echo -e "\nRemoving $VHOST"
 
   	echo "Remove directory $webroot/$DOMAIN_NAME"
-  	/usr/bin/rm -rf $webroot/$DOMAIN_NAME
+  	/bin/rm -rf $webroot/$DOMAIN_NAME
 
   	echo "Remove conf file $CONF_FILE"
-	/usr/bin/rm -f $CONF_FILE
+	/bin/rm -f $CONF_FILE
 
   	echo "Remove link /etc/httpd/sites-enabled/$CONF_FILE_NAME"
-  	/usr/bin/rm -f /etc/httpd/sites-enabled/$CONF_FILE_NAME
+  	/bin/rm -f /etc/httpd/sites-enabled/$CONF_FILE_NAME
 
   	echo "Comment /etc/hosts param..."
   	/bin/sed -i "s/$LOCAL_IP $DOMAIN_NAME/#$LOCAL_IP $DOMAIN_NAME/" /etc/hosts
@@ -171,11 +175,11 @@ fi
 if [[ "$FLAG" == "3" ]]
 	then
 	echo -e "\nSites created"
-	/usr/bin/ls -la /etc/httpd/sites-created
+	/bin/ls -la /etc/httpd/sites-created
 
 	echo -e "\nSites enabled"
-	/usr/bin/ls -la /etc/httpd/sites-enabled
+	/bin/ls -la /etc/httpd/sites-enabled
 
 	echo -e "\n/var/www folder list"
-	/usr/bin/ls -la /var/www
+	/bin/ls -la /var/www
 fi
