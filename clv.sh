@@ -123,11 +123,10 @@ if [[ "$FLAG" == "1" ]]
 		echo "DocumentRoot /var/www/$DOMAIN_NAME/public_html" >> $CONF_FILE
 		echo "ErrorLog /var/www/$DOMAIN_NAME/error.log" >> $CONF_FILE
 		echo "CustomLog /var/www/$DOMAIN_NAME/requests.log combined" >> $CONF_FILE
-		echo "</VirtualHost>" >> $CONF_FILE
 		echo "<Directory /var/www/$DOMAIN_NAME/public_html>" >> $CONF_FILE
 		echo "AllowOverride All" >> $CONF_FILE
 		echo "</Directory>" >> $CONF_FILE
-
+		echo "</VirtualHost>" >> $CONF_FILE
 
 		echo "Create link / Enable domain $DOMAIN_NAME"
 		/bin/ln -s $CONF_FILE /etc/httpd/sites-enabled/$CONF_FILE_NAME
