@@ -1,7 +1,6 @@
 #!/bin/bash
 # Author: Yevgeniy Goncharov aka xck, http://sys-admin.kz
 
-
 # iptable rules
 # iptables -I INPUT -p tcp -m tcp --dport 81 -j ACCEPT
 # service iptables save
